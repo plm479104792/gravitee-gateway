@@ -319,7 +319,6 @@ public class SyncManager {
 
         plan.setId(repoPlan.getId());
         plan.setName(repoPlan.getName());
-        plan.setApi(repoPlan.getApi());
         plan.setSecurityDefinition(repoPlan.getSecurityDefinition());
         plan.setSelectionRule(repoPlan.getSelectionRule());
         plan.setTags(repoPlan.getTags());

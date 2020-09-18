@@ -299,7 +299,7 @@ public class ApiManagerTest {
 
         final Api api2 = new Api(api);
         api2.setDeployedAt(new Date());
-        api2.setPlans(Collections.emptyList());
+        api2.setPlans(Collections.<Plan>emptyList());
 
         apiManager.register(api2);
 

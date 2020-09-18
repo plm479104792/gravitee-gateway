@@ -13,29 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.gateway.handlers.api.policy;
+package io.gravitee.gateway.handlers.api.flow.evaluation.el;
 
-import io.gravitee.definition.model.Rule;
+import io.gravitee.definition.model.flow.Flow;
 import io.gravitee.gateway.api.ExecutionContext;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import io.gravitee.gateway.handlers.api.flow.ConditionEvaluator;
 
 /**
+ * This {@link ConditionEvaluator} evaluates to true if the condition of the flow is evaluated to <code>true</code>.
+ *
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public abstract class RuleBasedPolicyResolver implements PolicyResolver {
+public class ExpressionLanguageBasedConditionEvaluator implements ConditionEvaluator {
 
-    protected List<Policy> resolve(ExecutionContext context, List<Rule> rules) {
-        if (rules != null && ! rules.isEmpty()) {
-            return rules.stream()
-                    .filter(rule -> rule.isEnabled() && rule.getMethods().contains(context.request().method()))
-                    .map(rule -> new Policy(rule.getPolicy().getName(), rule.getPolicy().getConfiguration()))
-                    .collect(Collectors.toList());
+    @Override
+    public boolean evaluate(Flow flow, ExecutionContext context) {
+        if (flow.getCondition() != null) {
+            return context.getTemplateEngine().getValue(flow.getCondition(), Boolean.class);
         }
 
-        return Collections.emptyList();
+        return true;
     }
 }

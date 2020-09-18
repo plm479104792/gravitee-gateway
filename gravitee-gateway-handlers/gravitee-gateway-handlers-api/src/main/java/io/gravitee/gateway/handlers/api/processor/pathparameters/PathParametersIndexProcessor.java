@@ -21,9 +21,7 @@ import io.gravitee.gateway.handlers.api.path.Path;
 import io.gravitee.gateway.handlers.api.path.PathParam;
 import io.gravitee.gateway.handlers.api.path.PathResolver;
 import io.gravitee.gateway.handlers.api.policy.api.ApiPolicyResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,11 +34,7 @@ public class PathParametersIndexProcessor extends AbstractProcessor<ExecutionCon
 
     private final static char URL_PATH_SEPARATOR = '/';
 
-    @Autowired
     private PathResolver pathResolver;
-
-    public PathParametersIndexProcessor() {
-    }
 
     public PathParametersIndexProcessor(PathResolver pathResolver) {
         this.pathResolver = pathResolver;
@@ -81,9 +75,7 @@ public class PathParametersIndexProcessor extends AbstractProcessor<ExecutionCon
 
         context.setAttribute(ApiPolicyResolver.API_RESOLVED_PATH, path);
 
-        // TODO: deprecated ?
-        // Not sure this is used by someone during policies processing
-        // Perhaps it may be removed in the future
+        // Used, at least, by rate-limit / quota policies
         context.setAttribute(ExecutionContext.ATTR_RESOLVED_PATH, path.getPath());
         return path;
     }

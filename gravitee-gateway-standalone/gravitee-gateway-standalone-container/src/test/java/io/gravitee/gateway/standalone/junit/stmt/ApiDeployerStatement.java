@@ -16,8 +16,8 @@
 package io.gravitee.gateway.standalone.junit.stmt;
 
 import io.gravitee.definition.jackson.datatype.GraviteeMapper;
+import io.gravitee.definition.model.Api;
 import io.gravitee.definition.model.EndpointGroup;
-import io.gravitee.gateway.handlers.api.definition.Api;
 import io.gravitee.gateway.handlers.api.manager.ApiManager;
 import io.gravitee.gateway.standalone.ApiLoaderInterceptor;
 import io.gravitee.gateway.standalone.GatewayContainer;
@@ -70,7 +70,7 @@ public class ApiDeployerStatement extends Statement {
         Api api = loadApi(target.getClass().getAnnotation(ApiDescriptor.class).value());
 
         try {
-            apiManager.register(api);
+            apiManager.register(new io.gravitee.gateway.handlers.api.definition.Api(api));
             base.evaluate();
         } finally {
             apiManager.unregister(api.getId());

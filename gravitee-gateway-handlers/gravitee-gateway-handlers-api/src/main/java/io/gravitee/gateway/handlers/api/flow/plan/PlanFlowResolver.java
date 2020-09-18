@@ -13,29 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.gateway.handlers.api.policy;
+package io.gravitee.gateway.handlers.api.flow.plan;
 
-import io.gravitee.definition.model.Rule;
+import io.gravitee.definition.model.Plan;
+import io.gravitee.definition.model.flow.Flow;
 import io.gravitee.gateway.api.ExecutionContext;
+import io.gravitee.gateway.handlers.api.definition.Api;
+import io.gravitee.gateway.handlers.api.flow.FlowResolver;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public abstract class RuleBasedPolicyResolver implements PolicyResolver {
+public class PlanFlowResolver implements FlowResolver {
 
-    protected List<Policy> resolve(ExecutionContext context, List<Rule> rules) {
-        if (rules != null && ! rules.isEmpty()) {
-            return rules.stream()
-                    .filter(rule -> rule.isEnabled() && rule.getMethods().contains(context.request().method()))
-                    .map(rule -> new Policy(rule.getPolicy().getName(), rule.getPolicy().getConfiguration()))
-                    .collect(Collectors.toList());
-        }
+    private final Api api;
 
-        return Collections.emptyList();
+    public PlanFlowResolver(Api api) {
+        this.api = api;
+    }
+
+    @Override
+    public List<Flow> resolve(ExecutionContext context) {
+        Plan plan = api.getPlan(context.request().metrics().getPlan());
+
+        return (plan != null) ? plan.getFlows() : null;
     }
 }

@@ -45,8 +45,7 @@ public class PlanBasedAuthenticationHandlerEnhancerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        authenticationHandlerEnhancer = new PlanBasedAuthenticationHandlerEnhancer();
-        authenticationHandlerEnhancer.setApi(api);
+        authenticationHandlerEnhancer = new PlanBasedAuthenticationHandlerEnhancer(api);
 
         when(api.getName()).thenReturn("My API");
         when(api.getVersion()).thenReturn("v1");

@@ -15,7 +15,6 @@
  */
 package io.gravitee.gateway.handlers.api;
 
-import io.gravitee.definition.model.Api;
 import io.gravitee.gateway.core.endpoint.factory.EndpointFactory;
 import io.gravitee.gateway.core.endpoint.factory.spring.SpringFactoriesEndpointFactory;
 import io.gravitee.gateway.core.endpoint.lifecycle.GroupLifecyleManager;
@@ -26,8 +25,7 @@ import io.gravitee.gateway.core.endpoint.resolver.EndpointResolver;
 import io.gravitee.gateway.core.endpoint.resolver.impl.TargetEndpointResolver;
 import io.gravitee.gateway.core.invoker.InvokerFactory;
 import io.gravitee.gateway.handlers.api.context.ApiTemplateVariableProvider;
-import io.gravitee.gateway.handlers.api.path.PathResolver;
-import io.gravitee.gateway.handlers.api.path.impl.ApiPathResolverImpl;
+import io.gravitee.gateway.handlers.api.definition.Api;
 import io.gravitee.gateway.handlers.api.policy.security.PlanBasedAuthenticationHandlerEnhancer;
 import io.gravitee.gateway.handlers.api.processor.OnErrorProcessorChainFactory;
 import io.gravitee.gateway.handlers.api.processor.RequestProcessorChainFactory;
@@ -55,11 +53,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class ApiHandlerConfiguration {
-
-    @Bean
-    public PathResolver pathResolver(Api api) {
-        return new ApiPathResolverImpl(api);
-    }
 
     @Bean
     public ReactorHandler apiReactorHandler(Api api) {
@@ -102,8 +95,8 @@ public class ApiHandlerConfiguration {
     }
 
     @Bean
-    public AuthenticationHandlerEnhancer authenticationHandlerEnhancer() {
-        return new PlanBasedAuthenticationHandlerEnhancer();
+    public AuthenticationHandlerEnhancer authenticationHandlerEnhancer(Api api) {
+        return new PlanBasedAuthenticationHandlerEnhancer(api);
     }
 
     @Bean
@@ -130,6 +123,7 @@ public class ApiHandlerConfiguration {
     public ReferenceRegister referenceRegister() {
         return new DefaultReferenceRegister();
     }
+
     @Bean
     public GroupLifecyleManager groupLifecyleManager() {
         return new DefaultGroupLifecycleManager();

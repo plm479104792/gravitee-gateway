@@ -15,27 +15,21 @@
  */
 package io.gravitee.gateway.handlers.api.policy;
 
-import io.gravitee.definition.model.Rule;
-import io.gravitee.gateway.api.ExecutionContext;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import io.gravitee.gateway.policy.PolicyChainProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public abstract class RuleBasedPolicyResolver implements PolicyResolver {
+public abstract class AbstractPolicyChainProvider implements PolicyChainProvider {
 
-    protected List<Policy> resolve(ExecutionContext context, List<Rule> rules) {
-        if (rules != null && ! rules.isEmpty()) {
-            return rules.stream()
-                    .filter(rule -> rule.isEnabled() && rule.getMethods().contains(context.request().method()))
-                    .map(rule -> new Policy(rule.getPolicy().getName(), rule.getPolicy().getConfiguration()))
-                    .collect(Collectors.toList());
-        }
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-        return Collections.emptyList();
+    protected final PolicyResolver policyResolver;
+
+    protected AbstractPolicyChainProvider(final PolicyResolver policyResolver) {
+        this.policyResolver = policyResolver;
     }
 }

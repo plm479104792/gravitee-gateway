@@ -19,9 +19,12 @@ import io.gravitee.common.http.HttpStatusCode;
 import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.core.processor.StreamableProcessor;
-import io.gravitee.gateway.policy.*;
-import io.gravitee.gateway.policy.impl.RequestPolicyChain;
-import io.gravitee.gateway.policy.impl.ResponsePolicyChain;
+import io.gravitee.gateway.handlers.api.policy.AbstractPolicyChainProvider;
+import io.gravitee.gateway.handlers.api.policy.PolicyChainFactory;
+import io.gravitee.gateway.handlers.api.policy.PolicyResolver;
+import io.gravitee.gateway.policy.DirectPolicyChain;
+import io.gravitee.gateway.policy.NoOpPolicyChain;
+import io.gravitee.gateway.policy.StreamType;
 import io.gravitee.policy.api.PolicyResult;
 
 import java.util.List;
@@ -40,9 +43,12 @@ public class PlanPolicyChainProvider extends AbstractPolicyChainProvider {
 
     private final StreamType streamType;
 
-    public PlanPolicyChainProvider(final StreamType streamType, final PolicyResolver policyResolver) {
+    private final PolicyChainFactory policyChainFactory;
+
+    public PlanPolicyChainProvider(final StreamType streamType, final PolicyResolver policyResolver, final PolicyChainFactory policyChainFactory) {
         super(policyResolver);
         this.streamType = streamType;
+        this.policyChainFactory = policyChainFactory;
     }
 
     @Override
@@ -57,7 +63,7 @@ public class PlanPolicyChainProvider extends AbstractPolicyChainProvider {
             context.request().metrics().setSubscription((String) context.getAttribute(ExecutionContext.ATTR_SUBSCRIPTION_ID));
 
             // Calculate the list of policies to apply under this policy chain
-            List<Policy> policies = policyResolver.resolve(streamType, context);
+            List<PolicyResolver.Policy> policies = policyResolver.resolve(streamType, context);
 
             // No policies has been calculated on the ON_REQUEST phase
             // Returning a 401 because no plan is associated to the incoming secured request
@@ -67,13 +73,9 @@ public class PlanPolicyChainProvider extends AbstractPolicyChainProvider {
                                 GATEWAY_MISSING_SECURED_REQUEST_PLAN_KEY,
                                 HttpStatusCode.UNAUTHORIZED_401,
                                 "Unauthorized"), context);
-            } else if (policies.isEmpty()) {
-                return new NoOpPolicyChain(context);
             }
 
-            return (streamType == StreamType.ON_REQUEST) ?
-                    RequestPolicyChain.create(policies, context) :
-                    ResponsePolicyChain.create(policies, context);
+            return policyChainFactory.create(policies, streamType, context);
         } else {
             // Fix consuming application and subscription which are data that can be used by policies (ie. rate-limit).
             context.setAttribute(ExecutionContext.ATTR_APPLICATION, APPLICATION_NAME_ANONYMOUS);
